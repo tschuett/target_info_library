@@ -124,21 +124,6 @@ public:
   }
 };
 
-class StructType : public Type {
-  std::vector<Type *> members;
-  std::vector<unsigned> offsets;
-
-public:
-  StructType(std::vector<Type *> members)
-      : Type(TypeKind::StructType), members(members) {}
-
-  std::vector<Type *> getMembers() const { return members; }
-
-  static bool classof(const Type *S) {
-    return S->getKind() == TypeKind::StructType;
-  }
-};
-
 class ArrayType : public Type {
   Type *baseType;
   size_t elements;
@@ -158,11 +143,17 @@ public:
 class UnionType : public Type {
   std::vector<Type *> members;
 
-public:
-  UnionType(std::vector<Type *> members)
-      : Type(TypeKind::UnionType), members(members) {}
+  size_t sizeInBytes;
+  size_t alignmentInBytes;
 
-  std::vector<Type *> getMembers() const { return members; }
+public:
+  UnionType(std::vector<Type *> members, size_t sizeInBytes,
+            size_t alignmentInBytes)
+      : Type(TypeKind::UnionType), members(members), sizeInBytes(sizeInBytes),
+        alignmentInBytes(alignmentInBytes) {}
+
+  size_t getSizeInBytes() const { return sizeInBytes; }
+  size_t getAlignmentInBytes() const { return alignmentInBytes; }
 
   static bool classof(const Type *S) {
     return S->getKind() == TypeKind::UnionType;
@@ -173,15 +164,13 @@ class BitfieldType : public Type {
   // Fundamental data type, i.e, BuiltinType, VectorType, ScalableVectorType,
   // ScalablePredicateType, PointerType
   Type *fundamentDataType;
-
-  // FIXME fillness
+  size_t bits;
 
 public:
-  BitfieldType(Type *type)
-      : Type(TypeKind::BitfieldType), fundamentDataType(type) {}
+  BitfieldType(Type *type, size_t bits)
+      : Type(TypeKind::BitfieldType), fundamentDataType(type), bits(bits) {}
 
   static bool classof(const Type *S) {
     return S->getKind() == TypeKind::BitfieldType;
   }
 };
-

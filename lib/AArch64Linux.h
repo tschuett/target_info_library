@@ -22,7 +22,6 @@ public:
 
 private:
   size_t getMaxAlignment(std::span<Type *> members);
-  size_t fitIntoAlignment(std::span<Type *> members);
   bool isHomogeneousAggregate(const Type *);
   bool isHomogeneousFloatingPointAggregate(const Type *);
   bool isHomogeneousShortVectorAggregate(const Type *);
@@ -32,4 +31,5 @@ private:
   bool isShortVector(const Type *);
   bool isHalfOrSingle(const Type *);
   bool isFloat(const Type *);
+
 };

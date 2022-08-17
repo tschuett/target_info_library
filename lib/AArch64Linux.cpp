@@ -2,6 +2,7 @@
 
 #include "AArch64LinuxTypeBuilder.h"
 #include "Actions.h"
+#include "Struct.h"
 #include "Types.h"
 
 #include "llvm/Support/Casting.h"
@@ -60,13 +61,10 @@ size_t AArch64Linux::getSizeOf(const Type *type) {
     return bits / 8;
   } else if (auto aggre = dyn_cast<StructType>(type)) {
     // 5.9.1 Aggregates
-    // FIXME
-    std::vector<Type *> members = aggre->getMembers();
-    return fitIntoAlignment(members);
+    return aggre->getSizeInBytes();
   } else if (auto unio = dyn_cast<UnionType>(type)) {
     // 5.9.2 Union
-    std::vector<Type *> members = unio->getMembers();
-    return fitIntoAlignment(members);
+    return unio->getSizeInBytes();
   } else if (auto arra = dyn_cast<ArrayType>(type)) {
     // 5.9.3 Array
     Type *baseType = arra->getBaseType();
@@ -112,12 +110,10 @@ size_t AArch64Linux::getAlignmentOf(const Type *type) {
     return bits / 8;
   } else if (auto aggre = dyn_cast<StructType>(type)) {
     // 5.9.1 Aggregates
-    std::vector<Type *> members = aggre->getMembers();
-    return getMaxAlignment(members);
+    return aggre->getAlignmentInBytes();
   } else if (auto uni = dyn_cast<UnionType>(type)) {
     // 5.9.2 Union
-    std::vector<Type *> members = uni->getMembers();
-    return getMaxAlignment(members);
+    return uni->getAlignmentInBytes();
   } else if (auto arra = dyn_cast<ArrayType>(type)) {
     // 5.9.3 Array
     Type *baseType = arra->getBaseType();
@@ -255,21 +251,6 @@ size_t AArch64Linux::getMaxAlignment(std::span<Type *> members) {
   }
   return maxAlign;
 };
-
-size_t AArch64Linux::fitIntoAlignment(std::span<Type *> members) {
-  size_t maxAlignment = getMaxAlignment(members);
-  size_t sumSize = 0;
-  for (Type *mem : members) {
-    sumSize += getSizeOf(mem);
-  }
-
-  ldiv_t divResult = std::ldiv(sumSize, maxAlignment);
-  if (divResult.rem == 0) {
-    return sumSize;
-  } else {
-    return sumSize + divResult.rem * maxAlignment;
-  }
-}
 
 // 5.9.5   Homogeneous Aggregates
 bool AArch64Linux::isHomogeneousAggregate(const Type *type) {
@@ -417,6 +398,7 @@ bool AArch64Linux::isFloat(const Type *type) {
 
   return false;
 }
+
 
 TypeBuilder *AArch64Linux::getTypeBuilder() {
   return new AArch64LinuxTypeBuilder(this);

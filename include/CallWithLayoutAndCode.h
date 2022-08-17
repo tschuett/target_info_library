@@ -2,8 +2,11 @@
 
 #include "Actions.h"
 
-class CallWithLayoutAndCode {
- public:
+#include <vector>
 
-  void addAction(unsigned idex, Action *action);
+class CallWithLayoutAndCode {
+  std::vector<std::pair<unsigned, Action *>> actions;
+
+public:
+  void addAction(unsigned idx, Action *action);
 };

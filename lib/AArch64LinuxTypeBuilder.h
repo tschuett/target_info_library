@@ -13,4 +13,12 @@ public:
 
   VectorType *getVector(size_t bits) override;
 
+  UnionType *getUnion(std::span<Type *> members) override;
+
+  BitfieldType *getBitfield(Type *type, size_t bits) override;
+
+ private:
+
+  bool isFundamentalDataType(const Type *) const;
+
 };

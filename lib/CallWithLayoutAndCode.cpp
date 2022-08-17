@@ -1,3 +1,7 @@
 #include "CallWithLayoutAndCode.h"
 
-void CallWithLayoutAndCode::addAction(unsigned idex, Action *action) {}
+using namespace std;
+
+void CallWithLayoutAndCode::addAction(unsigned idx, Action *action) {
+  actions.push_back(make_pair(idx, action));
+}
