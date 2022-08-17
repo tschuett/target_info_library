@@ -1,5 +1,6 @@
 #include "AArch64LinuxTypeBuilder.h"
 
+#include "AArchLinuxStructBuilder.h"
 #include "Struct.h"
 #include "Types.h"
 
@@ -11,35 +12,7 @@ using namespace std;
 
 // 5.9   Composite Types
 StructType *AArch64LinuxTypeBuilder::getStruct(std::span<Type *> members) {
-  assert(!members.empty());
-
-  size_t currentOffset = 0;
-  size_t currentSize = 0;
-  std::vector<std::variant<Type *, unsigned>> newMembers;
-
-  // FIXME bitfields  5.3.4 Bit-fields
-  for (Type *member : members) {
-    if (BitfieldType *bit = llvm::dyn_cast<BitfieldType>(member)) {
-      // FIXME
-    } else {
-      size_t align = linux->getAlignmentOf(member);
-      size_t size = linux->getSizeOf(member);
-      size_t swizzle = currentOffset % align;
-      if (swizzle == 0) {
-        newMembers.push_back(member);
-        currentOffset += size;
-        currentSize += size;
-      } else {
-        newMembers.push_back((unsigned)(align - swizzle)); // padding
-        newMembers.push_back(member);                      // value
-        currentOffset += size;
-        currentSize += size;
-      }
-    }
-  }
-
-  return new StructType(newMembers, currentSize,
-                        linux->getAlignmentOf(members[0]));
+  return ::getStruct(members, linux);
 }
 
 VectorType *AArch64LinuxTypeBuilder::getVector(size_t bits) {

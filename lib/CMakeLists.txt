@@ -6,6 +6,7 @@ add_library(target_info_library
         Callwithlayoutandcode.cpp
         AArch32Linux.cpp
         AArch32LinuxTypeBuilder.cpp
+        AArchLinuxStructBuilder.cpp
 )
 
 target_include_directories(target_info_library PRIVATE ../include)
