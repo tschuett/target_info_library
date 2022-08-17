@@ -164,11 +164,16 @@ class BitfieldType : public Type {
   // Fundamental data type, i.e, BuiltinType, VectorType, ScalableVectorType,
   // ScalablePredicateType, PointerType
   Type *fundamentDataType;
+  size_t sizeInBytes;
   size_t bits;
 
 public:
-  BitfieldType(Type *type, size_t bits)
-      : Type(TypeKind::BitfieldType), fundamentDataType(type), bits(bits) {}
+  BitfieldType(Type *type, size_t sizeInBytes, size_t bits)
+      : Type(TypeKind::BitfieldType), fundamentDataType(type),
+        sizeInBytes(sizeInBytes), bits(bits) {}
+
+  size_t getSizeInBytes() const { return sizeInBytes; }
+  size_t getFreeBits() const { return sizeInBytes * 8 - bits; };
 
   static bool classof(const Type *S) {
     return S->getKind() == TypeKind::BitfieldType;

@@ -8,6 +8,7 @@ public:
     CopyToMemoryKind,
     SizeRoundUpKind,
     SetSizeWithUnspecifiedUpperKind,
+    ZeroOrSignExtendKind
   };
 
 private:
@@ -47,5 +48,14 @@ class SetSizeWithUnspecifiedUpper : public Action {
 public:
   SetSizeWithUnspecifiedUpper(Type *type, unsigned size)
       : Action(ActionKind::SetSizeWithUnspecifiedUpperKind), type(type),
-        size(size){}
+        size(size) {}
+};
+
+class ZeroOrSignExtendAction : public Action {
+  Type *arg;
+  unsigned size;
+
+public:
+  ZeroOrSignExtendAction(Type *arg, unsigned size)
+      : Action(ActionKind::ZeroOrSignExtendKind), arg(arg), size(size) {}
 };

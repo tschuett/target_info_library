@@ -2,10 +2,10 @@
 
 #include "TargetInfo.h"
 
-class AArch64Linux : public TargetInfo {
+class AArch32Linux : public TargetInfo {
 public:
-  AArch64Linux() = default;
-  virtual ~AArch64Linux() = default;
+  AArch32Linux() = default;
+  virtual ~AArch32Linux() = default;
 
   bool isBigEndian() override;
 
@@ -22,16 +22,18 @@ public:
 
   TypeBuilder *getTypeBuilder() override;
 
-private:
-  size_t getMaxAlignment(std::span<Type *> members);
-  bool isHomogeneousAggregate(const Type *);
-  bool isHomogeneousFloatingPointAggregate(const Type *);
-  bool isHomogeneousShortVectorAggregate(const Type *);
 
-  bool isPureScalabeType(const Type *);
-  bool isFloatOrShortVector(const Type *);
-  bool isShortVector(const Type *);
-  bool isHalfOrSingle(const Type *);
-  bool isFloat(const Type *);
+private:
+  //  size_t getMaxAlignment(std::span<Type *> members);
+  bool isHomogeneousAggregate(const Type *);
   bool isDynamicallySizedType(Type *type);
+  bool isIntegralFundamentDataType(Type *arg);
+  //  bool isHomogeneousFloatingPointAggregate(const Type *);
+  //  bool isHomogeneousShortVectorAggregate(const Type *);
+  //
+  //  bool isPureScalabeType(const Type *);
+  //  bool isFloatOrShortVector(const Type *);
+  //  bool isShortVector(const Type *);
+  //  bool isHalfOrSingle(const Type *);
+  //  bool isFloat(const Type *);
 };

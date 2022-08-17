@@ -1,13 +1,13 @@
 #pragma once
 
-#include "AArch64Linux.h"
+#include "AArch32Linux.h"
 #include "TypeBuilder.h"
 
-class AArch64LinuxTypeBuilder : public TypeBuilder {
-  AArch64Linux *linux;
+class AArch32LinuxTypeBuilder : public TypeBuilder {
+  AArch32Linux *linux;
 
 public:
-  AArch64LinuxTypeBuilder(AArch64Linux *linux) : linux(linux) {}
+  AArch32LinuxTypeBuilder(AArch32Linux *linux) : linux(linux) {}
 
   StructType *getStruct(std::span<Type *> members) override;
 

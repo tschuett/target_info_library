@@ -24,6 +24,8 @@ public:
   virtual size_t getAlignmentOf(const Type *) = 0;
   virtual bool isSupported(const Type *) = 0;
 
+  virtual unsigned getNrOfBitsInLargestLockFreeInteger() const = 0;
+
   virtual CallWithLayoutAndCode getCall(const FunctionType *signature,
                                         std::span<Type *> arguments) = 0;
 

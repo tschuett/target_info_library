@@ -165,8 +165,11 @@ CallWithLayoutAndCode AArch64Linux::getCall(const FunctionType *signature,
     if (isPureScalabeType(arg)) {
       // do nothing
     }
+
     // B.2
-    // FIXME
+    if (isDynamicallySizedType(arg)) {
+      result.addAction(idx, new CopyToMemoryAction(arg));
+    }
 
     // B.3
     if (isHomogeneousFloatingPointAggregate(arg) ||
@@ -399,7 +402,31 @@ bool AArch64Linux::isFloat(const Type *type) {
   return false;
 }
 
-
 TypeBuilder *AArch64Linux::getTypeBuilder() {
   return new AArch64LinuxTypeBuilder(this);
+}
+
+unsigned AArch64Linux::getNrOfBitsInLargestLockFreeInteger() const {
+  return 128;
+}
+
+bool AArch64Linux::isDynamicallySizedType(Type *type) {
+  if (auto aggre = llvm::dyn_cast<StructType>(type)) {
+    for (auto membr : aggre->getMembers()) {
+      if (llvm::isa<ScalablePredicateType>(membr)) {
+        return true;
+      }
+      if (llvm::isa<ScalableVectorType>(membr)) {
+        return true;
+      }
+      if (auto aggre = llvm::dyn_cast<StructType>(membr)) {
+        if (isDynamicallySizedType(aggre)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  } else {
+    return false;
+  }
 }

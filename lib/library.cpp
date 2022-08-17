@@ -1,3 +1,4 @@
+#include "AArch32Linux.h"
 #include "AArch64Linux.h"
 #include "TargetInfo.h"
 
@@ -10,6 +11,8 @@ unique_ptr<TargetInfo> getTargetInfo(llvm::Triple triple,
 
   if (triple.isAArch64())
     return make_unique<AArch64Linux>();
+  if (triple.isARM() && triple.isArch32Bit())
+    return make_unique<AArch32Linux>();
 
   printf("no target found: failed\n");
   assert(false);

@@ -19,18 +19,22 @@ StructType *AArch64LinuxTypeBuilder::getStruct(std::span<Type *> members) {
 
   // FIXME bitfields  5.3.4 Bit-fields
   for (Type *member : members) {
-    size_t align = linux->getAlignmentOf(member);
-    size_t size = linux->getSizeOf(member);
-    size_t swizzle = currentOffset % align;
-    if (swizzle == 0) {
-      newMembers.push_back(member);
-      currentOffset += size;
-      currentSize += size;
+    if (BitfieldType *bit = llvm::dyn_cast<BitfieldType>(member)) {
+      // FIXME
     } else {
-      newMembers.push_back((unsigned)(align - swizzle)); // padding
-      newMembers.push_back(member);                      // value
-      currentOffset += size;
-      currentSize += size;
+      size_t align = linux->getAlignmentOf(member);
+      size_t size = linux->getSizeOf(member);
+      size_t swizzle = currentOffset % align;
+      if (swizzle == 0) {
+        newMembers.push_back(member);
+        currentOffset += size;
+        currentSize += size;
+      } else {
+        newMembers.push_back((unsigned)(align - swizzle)); // padding
+        newMembers.push_back(member);                      // value
+        currentOffset += size;
+        currentSize += size;
+      }
     }
   }
 
@@ -39,6 +43,8 @@ StructType *AArch64LinuxTypeBuilder::getStruct(std::span<Type *> members) {
 }
 
 VectorType *AArch64LinuxTypeBuilder::getVector(size_t bits) {
+  assert((bits == 64) || (bits == 128));
+
   return new VectorType(bits);
 }
 
@@ -58,7 +64,10 @@ UnionType *AArch64LinuxTypeBuilder::getUnion(std::span<Type *> members) {
 }
 
 BitfieldType *AArch64LinuxTypeBuilder::getBitfield(Type *type, size_t bits) {
-  return new BitfieldType(type, bits);
+  assert(isFundamentalDataType(type));
+
+  size_t sizeInBytes = linux->getSizeOf(type);
+  return new BitfieldType(type, sizeInBytes, bits);
 }
 
 // size_t AArch64Linux::fitIntoAlignment(std::span<Type *> members) {
