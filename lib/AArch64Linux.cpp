@@ -1,5 +1,7 @@
 #include "AArch64Linux.h"
 
+#include "AArch64LinuxTypeBuilder.h"
+#include "Actions.h"
 #include "Types.h"
 
 #include "llvm/Support/Casting.h"
@@ -19,7 +21,7 @@ using namespace std;
 
 bool AArch64Linux::isBigEndian() { return false; }
 
-bool AArch64Linux::isCharSigned() {}
+bool AArch64Linux::isCharSigned() { return false; }
 
 size_t AArch64Linux::getSizeOf(const Type *type) {
 
@@ -58,6 +60,7 @@ size_t AArch64Linux::getSizeOf(const Type *type) {
     return bits / 8;
   } else if (auto aggre = dyn_cast<StructType>(type)) {
     // 5.9.1 Aggregates
+    // FIXME
     std::vector<Type *> members = aggre->getMembers();
     return fitIntoAlignment(members);
   } else if (auto unio = dyn_cast<UnionType>(type)) {
@@ -125,8 +128,10 @@ size_t AArch64Linux::getAlignmentOf(const Type *type) {
 }
 
 bool AArch64Linux::isSupported(const Type *type) {
+  // FIXME
   switch (type->getKind()) {
   case Type::TypeKind::ArrayType: {
+    return true;
   }
   case Type::TypeKind::BitfieldType: {
   }
@@ -135,6 +140,7 @@ bool AArch64Linux::isSupported(const Type *type) {
   case Type::TypeKind::FunctionType: {
   }
   case Type::TypeKind::PointerType: {
+    return true;
   }
   case Type::TypeKind::ScalableVectorType: {
   }
@@ -147,10 +153,99 @@ bool AArch64Linux::isSupported(const Type *type) {
   case Type::TypeKind::VectorType: {
   }
   }
+
+  return false;
 }
 
 CallWithLayoutAndCode AArch64Linux::getCall(const FunctionType *signature,
-                                            span<Type *> arguments) {}
+                                            span<Type *> arguments) {
+
+  CallWithLayoutAndCode result;
+
+  // Stage B – Pre-padding and extension of arguments
+  unsigned idx = 0;
+  for (Type *arg : arguments) {
+    // B.1
+    if (isPureScalabeType(arg)) {
+      // do nothing
+    }
+    // B.2
+    // FIXME
+
+    // B.3
+    if (isHomogeneousFloatingPointAggregate(arg) ||
+        isHomogeneousShortVectorAggregate(arg)) {
+      // do nothing
+    }
+    // B.4
+    if (auto struc = dyn_cast<StructType>(arg)) {
+      if (getSizeOf(struc) > 16) {
+        result.addAction(idx, new CopyToMemoryAction(arg));
+      }
+      // B.5.
+      result.addAction(idx, new SizeRoundUpAction(arg, 8));
+    }
+    // B.6.
+    // FIXME
+
+    ++idx;
+  }
+
+  // Stage C – Assignment of arguments to registers and stack
+  idx = 0;
+  for (Type *arg : arguments) {
+    // C.1
+    if (isFloatOrShortVector(arg)) {
+      // do nothing
+    }
+    // C.2
+    // skipped
+    // C.3
+    if (isHomogeneousFloatingPointAggregate(arg) ||
+        isHomogeneousShortVectorAggregate(arg)) {
+      result.addAction(idx, new SizeRoundUpAction(arg, 8));
+    }
+    // C.4
+    // skipped
+    // C.5
+    if (isHalfOrSingle(arg)) {
+      result.addAction(idx, new SetSizeWithUnspecifiedUpper(arg, 8));
+    }
+    // C.6
+    if (isHomogeneousFloatingPointAggregate(arg) ||
+        isHomogeneousShortVectorAggregate(arg) || isFloatOrShortVector(arg)) {
+      result.addAction(idx, new CopyToMemoryAction(arg));
+    }
+    // C.7
+    // skipped
+    // C.8
+    // skipped
+    // C.9
+    // skipeed
+    // C.10
+    // skipped
+    // C.11
+    // skipped
+    // C.12
+    // skipped
+    // C.13
+    // skipped
+    // C.14
+    // skipped
+    // C.15
+    // skipped
+    // C.16
+    // skipped
+    // C.17
+    // skipped
+
+    // 6.5   Result return
+
+    ++idx;
+  }
+
+  return result;
+}
 
 size_t AArch64Linux::getMaxAlignment(std::span<Type *> members) {
   size_t maxAlign = 0;
@@ -177,7 +272,7 @@ size_t AArch64Linux::fitIntoAlignment(std::span<Type *> members) {
 }
 
 // 5.9.5   Homogeneous Aggregates
-bool AArch64Linux::isHomogeneousAggregate(Type *type) {
+bool AArch64Linux::isHomogeneousAggregate(const Type *type) {
   if (auto struc = dyn_cast<StructType>(type)) {
     vector<Type *> members = struc->getMembers();
     if (members.empty())
@@ -196,7 +291,7 @@ bool AArch64Linux::isHomogeneousAggregate(Type *type) {
 }
 
 // 5.9.5.1   Homogeneous Floating-point Aggregates (HFA)
-bool AArch64Linux::isHomogeneousFloatingPointAggregate(Type *type) {
+bool AArch64Linux::isHomogeneousFloatingPointAggregate(const Type *type) {
   if (not isHomogeneousAggregate(type))
     return false;
   if (auto struc = dyn_cast<StructType>(type)) {
@@ -214,7 +309,7 @@ bool AArch64Linux::isHomogeneousFloatingPointAggregate(Type *type) {
 }
 
 // 5.9.5.2   Homogeneous Short-Vector Aggregates (HVA)
-bool AArch64Linux::isHomogeneousShortVectorAggregate(Type *type) {
+bool AArch64Linux::isHomogeneousShortVectorAggregate(const Type *type) {
   if (not isHomogeneousAggregate(type))
     return false;
   if (auto struc = dyn_cast<StructType>(type)) {
@@ -224,7 +319,7 @@ bool AArch64Linux::isHomogeneousShortVectorAggregate(Type *type) {
     if (auto mem = dyn_cast<VectorType>(members[0])) {
       size_t bits = mem->getBits();
       // a short vector
-      return (bits == 64) || (bits == 128);
+      return isShortVector(mem);
     } else {
       return false;
     }
@@ -233,7 +328,7 @@ bool AArch64Linux::isHomogeneousShortVectorAggregate(Type *type) {
 }
 
 // 5.10 Pure Scalable Types(PSTs)
-bool AArch64Linux::isPureScalabeType(Type *type) {
+bool AArch64Linux::isPureScalabeType(const Type *type) {
   // scalable vector
   if (auto scal = dyn_cast<ScalableVectorType>(type))
     return true;
@@ -259,4 +354,70 @@ bool AArch64Linux::isPureScalabeType(Type *type) {
   }
 
   return false;
+}
+
+bool AArch64Linux::isShortVector(const Type *type) {
+  if (auto vec = dyn_cast<VectorType>(type)) {
+    return (vec->getBits() == 64) || (vec->getBits() == 128);
+  }
+  return false;
+}
+
+bool AArch64Linux::isFloatOrShortVector(const Type *type) {
+  if (isShortVector(type))
+    return true;
+
+  if (auto builtin = dyn_cast<BuiltinType>(type)) {
+    switch (builtin->getKind()) {
+    case BuiltinKind::Half:
+      return true;
+    case BuiltinKind::Single:
+      return true;
+    case BuiltinKind::Double:
+      return true;
+    case BuiltinKind::QuadFloat:
+      return true;
+    default:
+      return false;
+    }
+  }
+
+  return false;
+}
+
+bool AArch64Linux::isHalfOrSingle(const Type *type) {
+  if (auto builtin = dyn_cast<BuiltinType>(type)) {
+    switch (builtin->getKind()) {
+    case BuiltinKind::Half:
+      return true;
+    case BuiltinKind::Single:
+      return true;
+    default:
+      return false;
+    }
+  }
+  return false;
+}
+
+bool AArch64Linux::isFloat(const Type *type) {
+  if (auto builtin = dyn_cast<BuiltinType>(type)) {
+    switch (builtin->getKind()) {
+    case BuiltinKind::Half:
+      return true;
+    case BuiltinKind::Single:
+      return true;
+    case BuiltinKind::Double:
+      return true;
+    case BuiltinKind::QuadFloat:
+      return true;
+    default:
+      return false;
+    }
+  }
+
+  return false;
+}
+
+TypeBuilder *AArch64Linux::getTypeBuilder() {
+  return new AArch64LinuxTypeBuilder(this);
 }

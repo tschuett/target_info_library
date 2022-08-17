@@ -1,9 +1,9 @@
 #pragma once
 
+#include "Signature.h"
+
 #include <span>
 #include <vector>
-
-#include "Signature.h"
 
 enum class BuiltinKind {
   Byte,
@@ -126,6 +126,7 @@ public:
 
 class StructType : public Type {
   std::vector<Type *> members;
+  std::vector<unsigned> offsets;
 
 public:
   StructType(std::vector<Type *> members)
@@ -183,6 +184,4 @@ public:
     return S->getKind() == TypeKind::BitfieldType;
   }
 };
-
-class TypeBuilder {};
 

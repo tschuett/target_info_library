@@ -18,12 +18,18 @@ public:
   CallWithLayoutAndCode getCall(const FunctionType *signature,
                                 std::span<Type *> arguments) override;
 
-private:
-  size_t getMaxAlignment(std::span<Type*> members);
-  size_t fitIntoAlignment(std::span<Type *> members);
-  bool isHomogeneousAggregate(Type *);
-  bool isHomogeneousFloatingPointAggregate(Type *);
-  bool isHomogeneousShortVectorAggregate(Type *);
+  TypeBuilder *getTypeBuilder() override;
 
-  bool isPureScalabeType(Type *);
+private:
+  size_t getMaxAlignment(std::span<Type *> members);
+  size_t fitIntoAlignment(std::span<Type *> members);
+  bool isHomogeneousAggregate(const Type *);
+  bool isHomogeneousFloatingPointAggregate(const Type *);
+  bool isHomogeneousShortVectorAggregate(const Type *);
+
+  bool isPureScalabeType(const Type *);
+  bool isFloatOrShortVector(const Type *);
+  bool isShortVector(const Type *);
+  bool isHalfOrSingle(const Type *);
+  bool isFloat(const Type *);
 };

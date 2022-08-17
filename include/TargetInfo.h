@@ -1,13 +1,16 @@
 #pragma once
 
 #include "CallWithLayoutAndCode.h"
-#include "Types.h"
 
 #include "llvm/ADT/Triple.h"
 
 #include <memory>
 #include <span>
 #include <string>
+
+class Type;
+class FunctionType;
+class TypeBuilder;
 
 class TargetInfo {
 public:
@@ -23,6 +26,8 @@ public:
 
   virtual CallWithLayoutAndCode getCall(const FunctionType *signature,
                                         std::span<Type *> arguments) = 0;
+
+  virtual TypeBuilder *getTypeBuilder() = 0;
 };
 
 extern std::unique_ptr<TargetInfo>

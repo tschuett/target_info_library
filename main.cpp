@@ -13,5 +13,7 @@ int main(int argc, char **argv) {
   std::unique_ptr<TargetInfo> targetInfo =
       getTargetInfo(triple, cpuFeatureFlags);
 
+  TypeBuilder *builder = targetInfo->getTypeBuilder();
+
   return 0;
 }
