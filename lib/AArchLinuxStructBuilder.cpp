@@ -15,21 +15,25 @@ StructType *getStruct(std::span<Type *> members, TargetInfo *linux) {
 
   // FIXME bitfields  5.3.4 Bit-fields (32) or 5.9.4   Bit-fields subdivision
   // (64)
-  for (Type *member : members) {
-    if (BitfieldType *bit = llvm::dyn_cast<BitfieldType>(member)) {
-      bit->getFreeBits();
+  for (unsigned i = 0; i < members.size(); ++i) {
+    if (BitfieldType *bit = llvm::dyn_cast<BitfieldType>(members[i])) {
+      if (i + 1 < members.size()) {       // has successor?
+        if (bit->getFreeBits() / 8 > 0) { // there are bytes?
+          size_t align = linux->getAlignmentOf(members[i + 1]);
+        }
+      }
       // FIXME
     } else {
-      size_t align = linux->getAlignmentOf(member);
-      size_t size = linux->getSizeOf(member);
+      size_t align = linux->getAlignmentOf(members[i]);
+      size_t size = linux->getSizeOf(members[i]);
       size_t swizzle = currentOffset % align;
       if (swizzle == 0) {
-        newMembers.push_back(member);
+        newMembers.push_back(members[i]);
         currentOffset += size;
         currentSize += size;
       } else {
         newMembers.push_back((unsigned)(align - swizzle)); // padding
-        newMembers.push_back(member);                      // value
+        newMembers.push_back(members[i]);                  // value
         currentOffset += size;
         currentSize += size;
       }

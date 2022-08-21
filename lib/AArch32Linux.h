@@ -5,7 +5,10 @@
 class AArch32Linux : public TargetInfo {
 public:
   AArch32Linux() = default;
+
   virtual ~AArch32Linux() = default;
+
+  DataModel getDataModel() override { return DataModel::ILP32; };
 
   bool isBigEndian() override;
 
@@ -13,11 +16,11 @@ public:
 
   size_t getSizeOf(const Type *) override;
   size_t getAlignmentOf(const Type *) override;
-  bool isSupported(const Type *) override;
+  //bool isSupported(const Type *) override;
 
   unsigned getNrOfBitsInLargestLockFreeInteger() const override;
 
-  CallWithLayoutAndCode getCall(const FunctionType *signature,
+  CallWithLayoutAndCode getCall(/*const FunctionType *signature*,*/
                                 std::span<Type *> arguments) override;
 
   TypeBuilder *getTypeBuilder() override;

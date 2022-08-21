@@ -1,15 +1,18 @@
 #pragma once
 
-#include "AArch32Linux.h"
+#include "TargetInfo.h"
 #include "TypeBuilder.h"
+#include "Types.h"
 
-class AArch32LinuxTypeBuilder : public TypeBuilder {
+class X86LinuxTypeBuilder : public TypeBuilder {
 public:
-  AArch32LinuxTypeBuilder(AArch32Linux *linux) : TypeBuilder(linux) {}
+  X86LinuxTypeBuilder(TargetInfo *linux) : TypeBuilder(linux) {}
 
   StructType *getStruct(std::span<Type *> members) override;
 
 private:
+  //bool isFundamentalDataType(Type *) const;
+
   virtual bool isSupportedVectorLength(size_t bits) const override;
 
   virtual bool isSupportedBitFieldType(const Type *) const override;

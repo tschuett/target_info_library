@@ -1,5 +1,6 @@
 #include "AArch32Linux.h"
 
+#include "AArch32LinuxTypeBuilder.h"
 #include "Struct.h"
 #include "Types.h"
 
@@ -101,11 +102,7 @@ size_t AArch32Linux::getAlignmentOf(const Type *type) {
   }
 }
 
-bool AArch32Linux::isSupported(const Type *) {
-  // FIXME
-}
-
-CallWithLayoutAndCode AArch32Linux::getCall(const FunctionType *signature,
+CallWithLayoutAndCode AArch32Linux::getCall(/*const FunctionType *signature,*/
                                             std::span<Type *> arguments) {
 
   CallWithLayoutAndCode result;
@@ -171,7 +168,9 @@ CallWithLayoutAndCode AArch32Linux::getCall(const FunctionType *signature,
   return result;
 }
 
-TypeBuilder *AArch32Linux::getTypeBuilder() {}
+TypeBuilder *AArch32Linux::getTypeBuilder() {
+  return new AArch32LinuxTypeBuilder(this);
+}
 
 // 5.3.5   Homogeneous Aggregates
 bool AArch32Linux::isHomogeneousAggregate(const Type *type) {

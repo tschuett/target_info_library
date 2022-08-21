@@ -40,7 +40,7 @@ public:
 
 /// The effect is as if the argument had been copied to the least significant
 /// bits of a 64 bit register and the remaining bits filled with unspecified
-/// values.
+/// values. https://github.com/rust-lang/rust/issues/97463
 class SetSizeWithUnspecifiedUpper : public Action {
   Type *type;
   unsigned size;

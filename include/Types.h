@@ -18,6 +18,8 @@ enum class BuiltinKind {
   SingleDecimal,
   DoubleDecimal,
   QuadDecimal,
+  FloatWth80Bits
+  // BF16
 };
 
 class Type {

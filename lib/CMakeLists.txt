@@ -7,6 +7,9 @@ add_library(target_info_library
         AArch32Linux.cpp
         AArch32LinuxTypeBuilder.cpp
         AArchLinuxStructBuilder.cpp
+        X8664Linux.cpp
+        X86LinuxTypeBuilder.cpp
+        TypeBuilder.cpp
 )
 
 target_include_directories(target_info_library PRIVATE ../include)

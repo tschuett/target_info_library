@@ -4,19 +4,18 @@
 #include "TypeBuilder.h"
 
 class AArch64LinuxTypeBuilder : public TypeBuilder {
-  AArch64Linux *linux;
 
 public:
-  AArch64LinuxTypeBuilder(AArch64Linux *linux) : linux(linux) {}
+  AArch64LinuxTypeBuilder(AArch64Linux *linux) : TypeBuilder(linux) {}
+
+  BuiltinType *getBuiltin(BuiltinKind bk) override;
 
   StructType *getStruct(std::span<Type *> members) override;
 
-  VectorType *getVector(size_t bits) override;
-
-  UnionType *getUnion(std::span<Type *> members) override;
-
-  BitfieldType *getBitfield(Type *type, size_t bits) override;
-
 private:
-  bool isFundamentalDataType(const Type *) const;
-};
+  bool isSupportedVectorLength(size_t bits) const override;
+
+  bool isSupportedBitFieldType(const Type *) const override;
+
+  bool areScalableTypesSupported() const override { return true; }
+  };

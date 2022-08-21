@@ -9,6 +9,7 @@
 
 #include <cstddef>
 #include <cstdlib>
+#include <limits>
 #include <vector>
 
 const uint8_t POINTER_SIZE = 8;
@@ -52,6 +53,10 @@ size_t AArch64Linux::getSizeOf(const Type *type) {
       return 8;
     case BuiltinKind::QuadDecimal:
       return 16;
+    case BuiltinKind::FloatWth80Bits: {
+      assert(false);
+      return std::numeric_limits<size_t>::max();
+    }
     }
   } else if (auto pointer = dyn_cast<PointerType>(type)) {
     return POINTER_SIZE;
@@ -101,6 +106,10 @@ size_t AArch64Linux::getAlignmentOf(const Type *type) {
       return 8;
     case BuiltinKind::QuadDecimal:
       return 16;
+    case BuiltinKind::FloatWth80Bits: {
+      assert(false);
+      return std::numeric_limits<size_t>::max();
+    }
     }
   } else if (auto pointer = dyn_cast<PointerType>(type)) {
     return POINTER_SIZE;
@@ -123,37 +132,7 @@ size_t AArch64Linux::getAlignmentOf(const Type *type) {
   }
 }
 
-bool AArch64Linux::isSupported(const Type *type) {
-  // FIXME
-  switch (type->getKind()) {
-  case Type::TypeKind::ArrayType: {
-    return true;
-  }
-  case Type::TypeKind::BitfieldType: {
-  }
-  case Type::TypeKind::BuiltinType: {
-  }
-  case Type::TypeKind::FunctionType: {
-  }
-  case Type::TypeKind::PointerType: {
-    return true;
-  }
-  case Type::TypeKind::ScalableVectorType: {
-  }
-  case Type::TypeKind::ScalablePredicateType: {
-  }
-  case Type::TypeKind::StructType: {
-  }
-  case Type::TypeKind::UnionType: {
-  }
-  case Type::TypeKind::VectorType: {
-  }
-  }
-
-  return false;
-}
-
-CallWithLayoutAndCode AArch64Linux::getCall(const FunctionType *signature,
+CallWithLayoutAndCode AArch64Linux::getCall(/*const FunctionType *signature,*/
                                             span<Type *> arguments) {
 
   CallWithLayoutAndCode result;
