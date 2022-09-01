@@ -13,3 +13,5 @@ add_library(target_info_library
 )
 
 target_include_directories(target_info_library PRIVATE ../include)
+
+add_subdirectory(riscv)

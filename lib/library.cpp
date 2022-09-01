@@ -3,6 +3,9 @@
 #include "TargetInfo.h"
 #include "X8664Linux.h"
 
+#include "riscv/riscv64.h"
+#include "riscv/riscv32.h"
+
 #include <memory>
 
 using namespace std;
@@ -19,6 +22,12 @@ unique_ptr<TargetInfo> getTargetInfo(llvm::Triple triple,
 
   if (triple.isX86() && triple.isArch64Bit())
     return make_unique<X8664Linux>();
+
+  if (triple.isRISCV() && triple.isArch64Bit())
+    return make_unique<RISCV64Linux>();
+
+  if (triple.isRISCV() && triple.isArch32Bit())
+    return make_unique<RISCV32Linux>();
 
   printf("no target found: failed\n");
   assert(false);
